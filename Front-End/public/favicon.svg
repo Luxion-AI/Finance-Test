@@ -1,0 +1,42 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Digital Soft Glow Badge -->
+  <rect x="8" y="8" width="84" height="84" rx="24" fill="url(#digital-bg-grad)" fill-opacity="0.15" stroke="url(#digital-border-grad)" stroke-width="2.5" />
+
+  <!-- Dynamic Digital Nodes & Connections -->
+  <path
+    d="M26 72L48 50L74 24"
+    stroke="url(#chart-line-grad)"
+    stroke-width="6"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <circle cx="26" cy="72" r="4" fill="#10B981" />
+  <circle cx="48" cy="50" r="4" fill="#3B82F6" />
+  <circle cx="74" cy="24" r="5" fill="#60A5FA" />
+
+  <!-- Geometric Stylized Letter F & Digital Wallet Card -->
+  <path
+    d="M32 30C32 25.5817 35.5817 22 40 22H72C74.2091 22 76 23.7909 76 26V34C76 36.2091 74.2091 38 72 38H46V46H64C66.2091 46 68 47.7909 68 50V56C68 58.2091 66.2091 60 64 60H46V74C46 76.2091 44.2091 78 42 78H36C33.7909 78 32 76.2091 32 74V30Z"
+    fill="url(#logo-main-grad)"
+  />
+
+  <!-- Gradient Definitions -->
+  <defs>
+    <linearGradient id="logo-main-grad" x1="32" y1="22" x2="76" y2="78" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2563EB" />
+      <stop stop-color="#3B82F6" />
+    </linearGradient>
+    <linearGradient id="chart-line-grad" x1="26" y1="72" x2="74" y2="24" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#10B981" />
+      <stop stop-color="#34D399" />
+    </linearGradient>
+    <linearGradient id="digital-bg-grad" x1="8" y1="8" x2="92" y2="92" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2563EB" />
+      <stop stop-color="#10B981" />
+    </linearGradient>
+    <linearGradient id="digital-border-grad" x1="8" y1="8" x2="92" y2="92" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3B82F6" stop-opacity="0.4" />
+      <stop stop-color="#10B981" stop-opacity="0.2" />
+    </linearGradient>
+  </defs>
+</svg>

@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  avatar    String?
+  resetToken        String?   @unique
+  resetTokenExpiry  DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  transactions Transaction[]
+  categories   Category[]
+  budgets      Budget[]
+  feedbacks    Feedback[]
+  savingsGoals SavingsGoal[]
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String
+  type      String
+  icon      String?
+  color     String?
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  transactions Transaction[]
+  budgets      Budget[]
+}
+
+model Transaction {
+  id          Int      @id @default(autoincrement())
+  amount      Float
+  description String?
+  date        DateTime
+  type        String
+  categoryId  Int
+  userId      Int
+  category    Category @relation(fields: [categoryId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Budget {
+  id         Int      @id @default(autoincrement())
+  amount     Float
+  month      Int
+  year       Int
+  categoryId Int
+  userId     Int
+  category   Category @relation(fields: [categoryId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+  createdAt  DateTime @default(now())
+}
+
+model Feedback {
+  id      Int      @id @default(autoincrement())
+  userId  Int
+  user    User     @relation(fields: [userId], references: [id])
+  type    String   @default("saran")
+  message String
+  createdAt DateTime @default(now())
+}
+
+model SavingsGoal {
+  id          Int      @id @default(autoincrement())
+  name        String
+  targetAmount Float
+  currentAmount Float  @default(0)
+  deadline    DateTime?
+  icon        String   @default("Target")
+  color       String   @default("#3b82f6")
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
