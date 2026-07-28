@@ -39,8 +39,8 @@ router.get('/google/callback',
   (req, res, next) => {
     passport.authenticate('google', { session: false }, (err, user, info) => {
       if (err || !user) {
-        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-        return res.redirect(`${frontendUrl}/login?oauth_error=${encodeURIComponent(err?.message || 'Gagal login dengan Google. Pastikan email Anda sudah ditambahkan sebagai Test User di Google Cloud Console.')}`);
+        const baseUrl = process.env.NODE_ENV === 'production' ? '' : (process.env.FRONTEND_URL || 'http://localhost:5173');
+        return res.redirect(`${baseUrl}/login?oauth_error=${encodeURIComponent(err?.message || 'Gagal login dengan Google. Pastikan email Anda sudah ditambahkan sebagai Test User di Google Cloud Console.')}`);
       }
       req.user = user;
       next();

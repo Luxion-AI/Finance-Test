@@ -160,7 +160,8 @@ const uploadAvatar = async (req, res, next) => {
 
 const googleCallback = (req, res) => {
   const { token, user } = req.user;
-  res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/oauth-callback?token=${token}&name=${encodeURIComponent(user.name)}&email=${encodeURIComponent(user.email)}`);
+  const baseUrl = process.env.NODE_ENV === 'production' ? '' : (process.env.FRONTEND_URL || 'http://localhost:5173');
+  res.redirect(`${baseUrl}/oauth-callback?token=${token}&name=${encodeURIComponent(user.name)}&email=${encodeURIComponent(user.email)}`);
 };
 
 const forgotPassword = async (req, res, next) => {

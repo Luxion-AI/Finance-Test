@@ -24,6 +24,7 @@ if (!fs.existsSync(uploadsDir)) {
 }
 
 const app = express();
+app.set('trust proxy', 1);
 
 const corsOptions = {
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
