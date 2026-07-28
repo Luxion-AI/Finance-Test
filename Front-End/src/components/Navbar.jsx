@@ -1,6 +1,6 @@
 import { useApp } from '../context/AppContext';
 import { getAvatarUrl } from '../utils/api';
-import { Menu, Sun, Moon } from 'lucide-react';
+import { Sun, Moon } from 'lucide-react';
 
 const Navbar = ({ title, onMenuToggle }) => {
   const { user, theme, toggleTheme } = useApp();
@@ -12,15 +12,8 @@ const Navbar = ({ title, onMenuToggle }) => {
 
   return (
     <header className="sticky top-0 z-30 bg-surface/80 backdrop-blur-md border-b border-border px-6 py-4 flex items-center justify-between">
-      {/* Title & Mobile Hamburger */}
+      {/* Title */}
       <div className="flex items-center gap-3">
-        <button
-          onClick={onMenuToggle}
-          aria-label="Buka menu navigasi"
-          className="p-1.5 hover:bg-surface-hover rounded-lg text-text-secondary hover:text-text md:hidden transition-colors"
-        >
-          <Menu className="h-5 w-5" />
-        </button>
         <h1 className="text-xl md:text-2xl font-bold text-text leading-none">{title}</h1>
       </div>
 
