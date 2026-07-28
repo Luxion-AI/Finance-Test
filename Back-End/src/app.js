@@ -5,8 +5,6 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
-const path = require('path');
-const fs = require('fs');
 const passport = require('./config/passport');
 
 const authRoutes = require('./routes/auth.routes');
@@ -18,10 +16,6 @@ const savingsGoalRoutes = require('./routes/savingsGoal.routes');
 const { errorHandler } = require('./middleware/error.middleware');
 
 // Ensure upload directories exist
-const uploadsDir = path.join(__dirname, '../uploads/avatars');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
 
 const app = express();
 app.set('trust proxy', 1);
@@ -54,9 +48,6 @@ app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
 app.use('/api/auth/forgot-password', authLimiter);
 app.use(passport.initialize());
-
-// Serve uploaded files
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Routing API
 app.use('/api/auth', authRoutes);

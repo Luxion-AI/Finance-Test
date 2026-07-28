@@ -3,9 +3,9 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const prisma = require('../lib/prisma');
 const path = require('path');
-const fs = require('fs');
 const { sendEmail } = require('../config/mail');
 const { DEFAULT_CATEGORIES } = require('../lib/constants');
+const { put, del } = require('@vercel/blob');
 
 const generateToken = (userId) => {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -137,18 +137,24 @@ const uploadAvatar = async (req, res, next) => {
 
     const currentUser = await prisma.user.findUnique({ where: { id: req.user.id } });
 
-    if (currentUser.avatar) {
-      const oldPath = path.join(__dirname, '../../', currentUser.avatar);
-      if (fs.existsSync(oldPath)) {
-        fs.unlinkSync(oldPath);
+    if (currentUser.avatar && currentUser.avatar.includes('public.blob.vercel-storage.com')) {
+      try {
+        await del(currentUser.avatar);
+      } catch (err) {
+        console.error('Failed to delete old avatar blob:', err);
       }
     }
 
-    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+    const ext = path.extname(req.file.originalname).toLowerCase();
+    const filename = `avatars/avatar-${req.user.id}-${Date.now()}${ext}`;
+    
+    const blob = await put(filename, req.file.buffer, {
+      access: 'public',
+    });
 
     const updated = await prisma.user.update({
       where: { id: req.user.id },
-      data: { avatar: avatarUrl },
+      data: { avatar: blob.url },
       select: userSelect,
     });
 

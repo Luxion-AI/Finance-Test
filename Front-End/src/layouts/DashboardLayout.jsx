@@ -35,6 +35,8 @@ const DashboardLayout = ({ children }) => {
         return "Kategori";
       case "/budgets":
         return "Budget";
+      case "/goals":
+        return "Goals";
       case "/settings":
         return "Pengaturan";
       case "/profile":
