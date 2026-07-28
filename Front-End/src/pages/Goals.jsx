@@ -32,12 +32,12 @@ const Goals = () => {
   const [deletingId, setDeletingId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const [form, setForm] = useState({ name: '', targetAmount: '', currentAmount: '0', deadline: '', icon: 'Target', color: '#3b82f6' });
+  const [form, setForm] = useState({ name: '', targetAmount: '', currentAmount: '', deadline: '', icon: 'Target', color: '#3b82f6' });
   const [fundAmount, setFundAmount] = useState('');
 
   const openAdd = () => {
     setEditing(null);
-    setForm({ name: '', targetAmount: '', currentAmount: '0', deadline: '', icon: 'Target', color: '#3b82f6' });
+    setForm({ name: '', targetAmount: '', currentAmount: '', deadline: '', icon: 'Target', color: '#3b82f6' });
     setModalOpen(true);
   };
 
@@ -181,8 +181,8 @@ const Goals = () => {
             <Input label="Nama Goal" value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} placeholder="Contoh: Liburan ke Bali" icon={Target} />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
-              <Input label="Target (Rp)" type="number" value={form.targetAmount} onChange={(e) => setForm((p) => ({ ...p, targetAmount: e.target.value }))} icon={Wallet} />
-              <Input label="Dana Awal (Rp)" type="number" value={form.currentAmount} onChange={(e) => setForm((p) => ({ ...p, currentAmount: e.target.value }))} icon={Wallet} />
+              <Input label="Target (Rp)" type="text" value={form.targetAmount} onChange={(e) => setForm((p) => ({ ...p, targetAmount: e.target.value.replace(/\D/g, '') }))} icon={Wallet} />
+              <Input label="Dana Awal (Rp)" type="text" value={form.currentAmount} onChange={(e) => setForm((p) => ({ ...p, currentAmount: e.target.value.replace(/\D/g, '') }))} icon={Wallet} />
             </div>
             <Input label="Deadline (opsional)" type="date" value={form.deadline} onChange={(e) => setForm((p) => ({ ...p, deadline: e.target.value }))} />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -200,7 +200,7 @@ const Goals = () => {
           {fundModal && (
             <div className="space-y-4">
               <p className="text-sm text-text-secondary">Menambah dana untuk <strong className="text-text">{fundModal.name}</strong></p>
-              <Input label="Jumlah (Rp)" type="number" value={fundAmount} onChange={(e) => setFundAmount(e.target.value)} icon={Plus} placeholder="Masukkan jumlah" />
+              <Input label="Jumlah (Rp)" type="text" value={fundAmount} onChange={(e) => setFundAmount(e.target.value.replace(/\D/g, ''))} icon={Plus} placeholder="Masukkan jumlah" />
               <Button variant="primary" fullWidth onClick={handleAddFunds} className="py-2.5">Tambah</Button>
             </div>
           )}
