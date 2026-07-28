@@ -262,7 +262,7 @@ const Register = () => {
         {/* Social Login Buttons */}
         <div className="grid grid-cols-1 gap-4">
           <a
-            href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/google`}
+            href={`${import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:5000/api')}/auth/google`}
             className="flex items-center justify-center gap-3 py-2.5 border border-border rounded-xl text-sm font-semibold hover:bg-surface-hover transition-all shadow-sm"
           >
             <svg viewBox="0 0 24 24" className="h-5 w-5 flex-shrink-0" aria-hidden="true">

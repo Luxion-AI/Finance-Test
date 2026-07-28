@@ -1,0 +1,7 @@
+{
+  "name": "finance-track-root",
+  "private": true,
+  "scripts": {
+    "postinstall": "cd Back-End && npm install"
+  }
+}
