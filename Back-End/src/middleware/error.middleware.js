@@ -12,9 +12,7 @@ const errorHandler = (err, req, res, next) => {
   }
 
   const statusCode = err.statusCode || 500;
-  const message = process.env.NODE_ENV === 'production' && statusCode === 500
-    ? 'Terjadi kesalahan pada server'
-    : err.message || 'Terjadi kesalahan pada server';
+  const message = err.message || 'Terjadi kesalahan pada server';
 
   res.status(statusCode).json({ success: false, message });
 };
