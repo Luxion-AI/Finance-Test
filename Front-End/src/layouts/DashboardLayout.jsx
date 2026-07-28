@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Navigate, useLocation, NavLink } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { LayoutDashboard, ArrowLeftRight, Tag, Wallet, Settings, User } from "lucide-react";
+import { LayoutDashboard, ArrowLeftRight, Tag, Wallet, Settings, User, Target, MessageSquare } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import Toast from "../components/Toast";
@@ -52,8 +52,10 @@ const DashboardLayout = ({ children }) => {
     { name: "Transaksi", path: "/transactions", icon: ArrowLeftRight },
     { name: "Kategori", path: "/categories", icon: Tag },
     { name: "Budget", path: "/budgets", icon: Wallet },
+    { name: "Goals", path: "/goals", icon: Target },
+    { name: "Masukan", path: null, icon: MessageSquare, onClick: () => setFeedbackOpen(true) },
     { name: "Profil", path: "/profile", icon: User },
-    { name: "Lainnya", path: "/settings", icon: Settings },
+    { name: "Pengaturan", path: "/settings", icon: Settings },
   ];
 
   return (
@@ -99,22 +101,36 @@ const DashboardLayout = ({ children }) => {
       </div>
 
       {/* ----------------- MOBILE BOTTOM NAVIGATION BAR ----------------- */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-surface border-t border-border flex justify-around items-center z-40 px-1 shadow-lg safe-area-bottom">
-        {mobileNavItems.map((item) => {
+      <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-surface border-t border-border flex justify-start items-center z-40 px-2 shadow-lg safe-area-bottom overflow-x-auto hide-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
+        {mobileNavItems.map((item, index) => {
           const shortName = item.name === "Pengaturan" ? "Setting" : item.name;
-          return (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={({ isActive }) => `
-                flex flex-col items-center justify-center flex-1 h-full transition-all duration-200 gap-0.5 active:scale-90
-                ${isActive ? "text-primary" : "text-text-secondary hover:text-text"}
-              `}
-            >
-              <item.icon className="h-5 w-5" />
-              <span className="text-[9px] sm:text-[10px] font-semibold leading-tight truncate max-w-[56px]">{shortName}</span>
-            </NavLink>
-          );
+          
+          if (item.path) {
+            return (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) => `
+                  flex flex-col items-center justify-center flex-shrink-0 w-[64px] h-full transition-all duration-200 gap-0.5 active:scale-90
+                  ${isActive ? "text-primary" : "text-text-secondary hover:text-text"}
+                `}
+              >
+                <item.icon className="h-5 w-5" />
+                <span className="text-[9px] sm:text-[10px] font-semibold leading-tight truncate max-w-[56px]">{shortName}</span>
+              </NavLink>
+            );
+          } else {
+            return (
+              <button
+                key={index}
+                onClick={item.onClick}
+                className="flex flex-col items-center justify-center flex-shrink-0 w-[64px] h-full transition-all duration-200 gap-0.5 active:scale-90 text-text-secondary hover:text-text"
+              >
+                <item.icon className="h-5 w-5" />
+                <span className="text-[9px] sm:text-[10px] font-semibold leading-tight truncate max-w-[56px]">{shortName}</span>
+              </button>
+            );
+          }
         })}
       </div>
     </div>
