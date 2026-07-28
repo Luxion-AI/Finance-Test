@@ -18,11 +18,25 @@ const create = async (req, res, next) => {
     if (!name || !targetAmount) {
       return res.status(400).json({ message: 'Nama dan target wajib diisi' });
     }
+    const parsedTarget = parseFloat(targetAmount);
+    if (isNaN(parsedTarget) || parsedTarget <= 0) {
+      return res.status(400).json({ message: 'Target harus berupa angka positif' });
+    }
+    const parsedCurrent = currentAmount ? parseFloat(currentAmount) : 0;
+    if (isNaN(parsedCurrent) || parsedCurrent < 0) {
+      return res.status(400).json({ message: 'Dana awal tidak valid' });
+    }
+    if (deadline && isNaN(new Date(deadline).getTime())) {
+      return res.status(400).json({ message: 'Format deadline tidak valid' });
+    }
+    if (name.length > 100) {
+      return res.status(400).json({ message: 'Nama goal maksimal 100 karakter' });
+    }
     const goal = await prisma.savingsGoal.create({
       data: {
-        name,
-        targetAmount: parseFloat(targetAmount),
-        currentAmount: currentAmount ? parseFloat(currentAmount) : 0,
+        name: name.trim(),
+        targetAmount: parsedTarget,
+        currentAmount: parsedCurrent,
         deadline: deadline ? new Date(deadline) : null,
         icon: icon || 'Target',
         color: color || '#3b82f6',
@@ -74,11 +88,15 @@ const addFunds = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { amount } = req.body;
+    const parsed = parseFloat(amount);
+    if (isNaN(parsed) || parsed <= 0) {
+      return res.status(400).json({ message: 'Jumlah harus berupa angka positif' });
+    }
     const goal = await prisma.savingsGoal.findFirst({ where: { id: parseInt(id), userId: req.user.id } });
     if (!goal) return res.status(404).json({ message: 'Goal tidak ditemukan' });
     const updated = await prisma.savingsGoal.update({
       where: { id: parseInt(id) },
-      data: { currentAmount: goal.currentAmount + parseFloat(amount) },
+      data: { currentAmount: goal.currentAmount + parsed },
     });
     res.json({ success: true, data: updated });
   } catch (error) {

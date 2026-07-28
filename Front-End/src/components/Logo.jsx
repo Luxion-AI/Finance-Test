@@ -1,4 +1,3 @@
-import React from 'react';
 
 const Logo = ({ className = 'h-8 w-8', showText = false, textClass = 'text-xl font-bold' }) => {
   return (

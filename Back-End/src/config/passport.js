@@ -1,8 +1,10 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const prisma = require('../lib/prisma');
+const { DEFAULT_CATEGORIES } = require('../lib/constants');
 
 const generateToken = (userId) => {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -26,7 +28,7 @@ passport.use(
         let user = await prisma.user.findUnique({ where: { email } });
 
         if (!user) {
-          const defaultPassword = await bcrypt.hash(Math.random().toString(36), 10);
+          const defaultPassword = await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 12);
           user = await prisma.user.create({
             data: {
               name: profile.displayName,
@@ -35,20 +37,6 @@ passport.use(
             },
           });
 
-          const DEFAULT_CATEGORIES = [
-            { name: 'Gaji', type: 'income', icon: 'Briefcase', color: '#10b981' },
-            { name: 'Freelance', type: 'income', icon: 'Laptop', color: '#3b82f6' },
-            { name: 'Investasi', type: 'income', icon: 'TrendingUp', color: '#8b5cf6' },
-            { name: 'Hadiah', type: 'income', icon: 'Gift', color: '#f59e0b' },
-            { name: 'Makanan', type: 'expense', icon: 'UtensilsCrossed', color: '#ef4444' },
-            { name: 'Transportasi', type: 'expense', icon: 'Car', color: '#8b5cf6' },
-            { name: 'Belanja', type: 'expense', icon: 'ShoppingBag', color: '#ec4899' },
-            { name: 'Tagihan', type: 'expense', icon: 'Receipt', color: '#f97316' },
-            { name: 'Hiburan', type: 'expense', icon: 'Gamepad2', color: '#06b6d4' },
-            { name: 'Kesehatan', type: 'expense', icon: 'Heart', color: '#ef4444' },
-            { name: 'Pendidikan', type: 'expense', icon: 'GraduationCap', color: '#3b82f6' },
-            { name: 'Rumah', type: 'expense', icon: 'Home', color: '#14b8a6' },
-          ];
           await prisma.category.createMany({
             data: DEFAULT_CATEGORIES.map((cat) => ({ ...cat, userId: user.id })),
           });

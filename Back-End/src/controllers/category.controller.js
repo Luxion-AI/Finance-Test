@@ -1,6 +1,5 @@
 const prisma = require('../lib/prisma');
-
-const ALLOWED_TYPES = ['income', 'expense'];
+const { ALLOWED_TYPES } = require('../lib/constants');
 
 const getAll = async (req, res, next) => {
   try {

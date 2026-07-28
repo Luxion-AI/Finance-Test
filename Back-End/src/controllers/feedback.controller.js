@@ -7,6 +7,9 @@ const sendFeedback = async (req, res, next) => {
     if (!message || !message.trim()) {
       return res.status(400).json({ message: 'Pesan tidak boleh kosong' });
     }
+    if (message.length > 500) {
+      return res.status(400).json({ message: 'Pesan maksimal 500 karakter' });
+    }
 
     const feedback = await prisma.feedback.create({
       data: {

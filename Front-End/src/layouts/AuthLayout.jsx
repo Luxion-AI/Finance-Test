@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp, Wallet, ArrowUpRight, ShieldCheck } from 'lucide-react';
 import Logo from '../components/Logo';

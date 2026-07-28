@@ -143,7 +143,7 @@ const Transactions = () => {
       amount: tx.amount.toString(),
       categoryId: tx.categoryId,
       date: tx.date,
-      note: tx.description,
+      description: tx.description || '',
     });
     setFormErrors({});
     setIsModalOpen(true);
@@ -712,13 +712,13 @@ const Transactions = () => {
             />
 
             {/* Note */}
-            <Input
-              label="Catatan / Keterangan"
-              type="text"
-              value={formData.description}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, note: e.target.value }))
-              }
+              <Input
+                label="Catatan / Keterangan"
+                type="text"
+                value={formData.description || ''}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, description: e.target.value }))
+                }
               placeholder="Contoh: Beli nasi goreng ayam"
               icon={FileText}
             />

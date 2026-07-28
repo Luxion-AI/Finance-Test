@@ -1,15 +1,24 @@
 const prisma = require('../lib/prisma');
-
-const ALLOWED_TYPES = ['income', 'expense'];
+const { ALLOWED_TYPES, getPagination } = require('../lib/constants');
 
 const getAll = async (req, res, next) => {
   try {
-    const transactions = await prisma.transaction.findMany({
-      where: { userId: req.user.id },
-      include: { category: true },
-      orderBy: { date: 'desc' },
+    const { page, limit, skip } = getPagination(req.query);
+    const [transactions, total] = await Promise.all([
+      prisma.transaction.findMany({
+        where: { userId: req.user.id },
+        include: { category: true },
+        orderBy: { date: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.transaction.count({ where: { userId: req.user.id } }),
+    ]);
+    res.json({
+      success: true,
+      data: transactions,
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
     });
-    res.json({ success: true, data: transactions });
   } catch (error) {
     next(error);
   }

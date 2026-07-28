@@ -25,30 +25,40 @@ const getAll = async (req, res, next) => {
       include: { category: true },
     });
 
-    const result = await Promise.all(
-      budgets.map(async (budget) => {
-        const spent = await prisma.transaction.aggregate({
-          where: {
-            userId: req.user.id,
-            categoryId: budget.categoryId,
-            type: 'expense',
-            date: {
-              gte: new Date(budget.year, budget.month - 1, 1),
-              lt: new Date(budget.year, budget.month, 1),
-            },
-          },
-          _sum: { amount: true },
-        });
+    if (budgets.length === 0) {
+      return res.json({ success: true, data: [] });
+    }
 
-        const totalSpent = spent._sum.amount || 0;
-        return {
-          ...budget,
-          spent: totalSpent,
-          remaining: budget.amount - totalSpent,
-          percentage: budget.amount > 0 ? Math.round((totalSpent / budget.amount) * 100) : 0,
-        };
-      })
-    );
+    // Single query to get all spending data grouped by categoryId
+    const categoryIds = budgets.map(b => b.categoryId);
+    const spendingData = await prisma.transaction.groupBy({
+      by: ['categoryId'],
+      where: {
+        userId: req.user.id,
+        categoryId: { in: categoryIds },
+        type: 'expense',
+        date: {
+          gte: new Date(where.year, (where.month || 1) - 1, 1),
+          lt: new Date(where.year, where.month || 12, 1),
+        },
+      },
+      _sum: { amount: true },
+    });
+
+    const spendingMap = {};
+    for (const s of spendingData) {
+      spendingMap[s.categoryId] = s._sum.amount || 0;
+    }
+
+    const result = budgets.map((budget) => {
+      const totalSpent = spendingMap[budget.categoryId] || 0;
+      return {
+        ...budget,
+        spent: totalSpent,
+        remaining: budget.amount - totalSpent,
+        percentage: budget.amount > 0 ? Math.round((totalSpent / budget.amount) * 100) : 0,
+      };
+    });
 
     res.json({ success: true, data: result });
   } catch (error) {

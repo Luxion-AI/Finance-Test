@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
+const prisma = require('../lib/prisma');
 
-const protect = (req, res, next) => {
+const protect = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -11,7 +12,14 @@ const protect = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
+      select: { id: true, name: true, email: true },
+    });
+    if (!user) {
+      return res.status(401).json({ message: 'User tidak ditemukan' });
+    }
+    req.user = user;
     next();
   } catch (error) {
     return res.status(401).json({ message: 'Token tidak valid atau sudah expired' });

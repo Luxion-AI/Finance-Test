@@ -1,4 +1,3 @@
-import React from 'react';
 
 const Skeleton = ({ className = '', count = 1, height = 'h-4' }) => {
   const widths = ['w-full', 'w-[90%]', 'w-[75%]', 'w-[85%]', 'w-[60%]'];

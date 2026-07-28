@@ -4,10 +4,12 @@ const { protect } = require('../middleware/auth.middleware');
 
 const router = Router();
 
-router.get('/', protect, getAll);
-router.post('/', protect, create);
-router.put('/:id', protect, update);
-router.delete('/:id', protect, remove);
-router.put('/:id/add-funds', protect, addFunds);
+router.use(protect);
+
+router.get('/', getAll);
+router.post('/', create);
+router.put('/:id', update);
+router.delete('/:id', remove);
+router.put('/:id/add-funds', addFunds);
 
 module.exports = router;

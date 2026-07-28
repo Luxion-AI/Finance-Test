@@ -1,7 +1,10 @@
+const dotenv = require('dotenv');
+dotenv.config();
+
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
-const dotenv = require('dotenv');
+const rateLimit = require('express-rate-limit');
 const path = require('path');
 const fs = require('fs');
 const passport = require('./config/passport');
@@ -14,8 +17,6 @@ const feedbackRoutes = require('./routes/feedback.routes');
 const savingsGoalRoutes = require('./routes/savingsGoal.routes');
 const { errorHandler } = require('./middleware/error.middleware');
 
-dotenv.config();
-
 // Ensure upload directories exist
 const uploadsDir = path.join(__dirname, '../uploads/avatars');
 if (!fs.existsSync(uploadsDir)) {
@@ -24,10 +25,33 @@ if (!fs.existsSync(uploadsDir)) {
 
 const app = express();
 
-// Middleware Global
-app.use(cors());
-app.use(express.json());
-app.use(morgan('dev'));
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true,
+};
+app.use(cors(corsOptions));
+app.use(express.json({ limit: '1mb' }));
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Terlalu banyak percobaan. Silakan coba lagi nanti.' },
+});
+
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use('/api/', generalLimiter);
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/register', authLimiter);
+app.use('/api/auth/forgot-password', authLimiter);
 app.use(passport.initialize());
 
 // Serve uploaded files
@@ -42,8 +66,16 @@ app.use('/api/feedback', feedbackRoutes);
 app.use('/api/savings-goals', savingsGoalRoutes);
 
 // Health Check Endpoint (Tes apakah server aktif)
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Server berjalan normal' });
+app.get('/api/health', async (req, res) => {
+  try {
+    const { PrismaClient } = require('@prisma/client');
+    const prisma = new PrismaClient();
+    await prisma.$queryRaw`SELECT 1`;
+    await prisma.$disconnect();
+    res.json({ status: 'OK', message: 'Server berjalan normal', db: 'connected' });
+  } catch (error) {
+    res.status(503).json({ status: 'ERROR', message: 'Database tidak terhubung' });
+  }
 });
 
 // Handling Error Global (Harus paling bawah)

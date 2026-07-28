@@ -5,6 +5,7 @@ const prisma = require('../lib/prisma');
 const path = require('path');
 const fs = require('fs');
 const { sendEmail } = require('../config/mail');
+const { DEFAULT_CATEGORIES } = require('../lib/constants');
 
 const generateToken = (userId) => {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -12,31 +13,20 @@ const generateToken = (userId) => {
 
 const userSelect = { id: true, name: true, email: true, avatar: true };
 
-const DEFAULT_CATEGORIES = [
-  { name: 'Gaji', type: 'income', icon: 'Briefcase', color: '#10b981' },
-  { name: 'Freelance', type: 'income', icon: 'Laptop', color: '#3b82f6' },
-  { name: 'Investasi', type: 'income', icon: 'TrendingUp', color: '#8b5cf6' },
-  { name: 'Hadiah', type: 'income', icon: 'Gift', color: '#f59e0b' },
-  { name: 'Makanan', type: 'expense', icon: 'UtensilsCrossed', color: '#ef4444' },
-  { name: 'Transportasi', type: 'expense', icon: 'Car', color: '#8b5cf6' },
-  { name: 'Belanja', type: 'expense', icon: 'ShoppingBag', color: '#ec4899' },
-  { name: 'Tagihan', type: 'expense', icon: 'Receipt', color: '#f97316' },
-  { name: 'Hiburan', type: 'expense', icon: 'Gamepad2', color: '#06b6d4' },
-  { name: 'Kesehatan', type: 'expense', icon: 'Heart', color: '#ef4444' },
-  { name: 'Pendidikan', type: 'expense', icon: 'GraduationCap', color: '#3b82f6' },
-  { name: 'Rumah', type: 'expense', icon: 'Home', color: '#14b8a6' },
-];
-
 const register = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
+
+    if (!password || password.length < 8) {
+      return res.status(400).json({ message: 'Password minimal 8 karakter' });
+    }
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
       return res.status(400).json({ message: 'Email sudah terdaftar' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 12);
 
     const user = await prisma.user.create({
       data: { name, email, password: hashedPassword },
@@ -127,7 +117,7 @@ const updatePassword = async (req, res, next) => {
       return res.status(400).json({ message: 'Password lama salah' });
     }
 
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
     await prisma.user.update({
       where: { id: req.user.id },
       data: { password: hashedPassword },
@@ -186,11 +176,12 @@ const forgotPassword = async (req, res, next) => {
     }
 
     const resetToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = await bcrypt.hash(resetToken, 10);
     const expiry = new Date(Date.now() + 60 * 60 * 1000); // 1 jam
 
     await prisma.user.update({
       where: { id: user.id },
-      data: { resetToken, resetTokenExpiry: expiry },
+      data: { resetToken: hashedToken, resetTokenExpiry: expiry },
     });
 
     const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${resetToken}`;
@@ -221,21 +212,30 @@ const resetPassword = async (req, res, next) => {
     const { token } = req.params;
     const { password } = req.body;
 
-    if (!password || password.length < 6) {
-      return res.status(400).json({ message: 'Password minimal 6 karakter' });
+    if (!password || password.length < 8) {
+      return res.status(400).json({ message: 'Password minimal 8 karakter' });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { resetToken: token },
+    const users = await prisma.user.findMany({
+      where: { resetToken: { not: null }, resetTokenExpiry: { gt: new Date() } },
     });
 
-    if (!user || !user.resetTokenExpiry || user.resetTokenExpiry < new Date()) {
+    let matchedUser = null;
+    for (const user of users) {
+      const isValid = await bcrypt.compare(token, user.resetToken);
+      if (isValid) {
+        matchedUser = user;
+        break;
+      }
+    }
+
+    if (!matchedUser || !matchedUser.resetTokenExpiry || matchedUser.resetTokenExpiry < new Date()) {
       return res.status(400).json({ message: 'Token tidak valid atau sudah kedaluwarsa' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 12);
     await prisma.user.update({
-      where: { id: user.id },
+      where: { id: matchedUser.id },
       data: { password: hashedPassword, resetToken: null, resetTokenExpiry: null },
     });
 
