@@ -41,12 +41,11 @@ const Modal = ({
     }
   }, [onClose]);
 
-  // Lock scroll, trap focus, restore focus
+  // Lock scroll, restore focus, and focus first element on open
   useEffect(() => {
     if (isOpen) {
       previousFocusRef.current = document.activeElement;
       document.body.style.overflow = 'hidden';
-      document.addEventListener('keydown', handleKeyDown);
       // Focus first focusable element
       requestAnimationFrame(() => {
         const focusable = modalRef.current?.querySelector(
@@ -56,13 +55,19 @@ const Modal = ({
       });
     } else {
       document.body.style.overflow = 'unset';
-      document.removeEventListener('keydown', handleKeyDown);
       previousFocusRef.current?.focus();
     }
     return () => {
       document.body.style.overflow = 'unset';
-      document.removeEventListener('keydown', handleKeyDown);
     };
+  }, [isOpen]);
+
+  // Trap focus / handle escape
+  useEffect(() => {
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
   }, [isOpen, handleKeyDown]);
 
   const sizes = {
