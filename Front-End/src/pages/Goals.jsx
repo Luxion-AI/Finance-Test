@@ -41,12 +41,21 @@ const Goals = () => {
     setModalOpen(true);
   };
 
+  const handleAmountChange = (field, value) => {
+    const rawValue = value.replace(/\D/g, '');
+    setForm(p => ({ ...p, [field]: rawValue }));
+  };
+
+  const handleFundChange = (value) => {
+    setFundAmount(value.replace(/\D/g, ''));
+  };
+
   const openEdit = (goal) => {
     setEditing(goal);
     setForm({
       name: goal.name,
-      targetAmount: String(goal.targetAmount),
-      currentAmount: String(goal.currentAmount),
+      targetAmount: String(goal.targetAmount || ''),
+      currentAmount: String(goal.currentAmount || ''),
       deadline: goal.deadline ? goal.deadline.slice(0, 10) : '',
       icon: goal.icon || 'Target',
       color: goal.color || '#3b82f6',
@@ -181,8 +190,20 @@ const Goals = () => {
             <Input label="Nama Goal" value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} placeholder="Contoh: Liburan ke Bali" icon={Target} />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
-              <Input label="Target (Rp)" type="text" value={form.targetAmount} onChange={(e) => setForm((p) => ({ ...p, targetAmount: e.target.value.replace(/\D/g, '') }))} icon={Wallet} />
-              <Input label="Dana Awal (Rp)" type="text" value={form.currentAmount} onChange={(e) => setForm((p) => ({ ...p, currentAmount: e.target.value.replace(/\D/g, '') }))} icon={Wallet} />
+              <Input 
+                label="Target (Rp)" 
+                type="text" 
+                value={form.targetAmount ? new Intl.NumberFormat('id-ID').format(form.targetAmount) : ''} 
+                onChange={(e) => handleAmountChange('targetAmount', e.target.value)} 
+                icon={Wallet} 
+              />
+              <Input 
+                label="Dana Awal (Rp)" 
+                type="text" 
+                value={form.currentAmount ? new Intl.NumberFormat('id-ID').format(form.currentAmount) : ''} 
+                onChange={(e) => handleAmountChange('currentAmount', e.target.value)} 
+                icon={Wallet} 
+              />
             </div>
             <Input label="Deadline (opsional)" type="date" value={form.deadline} onChange={(e) => setForm((p) => ({ ...p, deadline: e.target.value }))} />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -200,7 +221,14 @@ const Goals = () => {
           {fundModal && (
             <div className="space-y-4">
               <p className="text-sm text-text-secondary">Menambah dana untuk <strong className="text-text">{fundModal.name}</strong></p>
-              <Input label="Jumlah (Rp)" type="text" value={fundAmount} onChange={(e) => setFundAmount(e.target.value.replace(/\D/g, ''))} icon={Plus} placeholder="Masukkan jumlah" />
+              <Input 
+                label="Jumlah (Rp)" 
+                type="text" 
+                value={fundAmount ? new Intl.NumberFormat('id-ID').format(fundAmount) : ''} 
+                onChange={(e) => handleFundChange(e.target.value)} 
+                icon={Plus} 
+                placeholder="Masukkan jumlah" 
+              />
               <Button variant="primary" fullWidth onClick={handleAddFunds} className="py-2.5">Tambah</Button>
             </div>
           )}

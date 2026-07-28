@@ -303,7 +303,7 @@ export const AppProvider = ({ children }) => {
       addToast('Goal tabungan berhasil dibuat!', 'success');
       return true;
     } catch (error) {
-      addToast(error.response?.data?.message || 'Gagal membuat goal', 'error');
+      addToast(error.response?.data?.message || `Gagal membuat goal: ${error.message}`, 'error');
       return false;
     }
   };
